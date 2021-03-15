@@ -2,8 +2,8 @@
 #author: an_chao1994@163.com
 
 class Configs:
-    Data = {"train_data_path":"/workspace/mnt/storage/dingrui/traffic-detection-data/mini_traffic_data/train.json",
-           "val_data_path": "/workspace/mnt/storage/dingrui/traffic-detection-data/Traffic_Fu_Xu/ImageSets/Main/val_json.txt"
+    Data = {"train_data_path":".../train_json.txt",
+           "val_data_path": ".../val_json.txt"
            }
     Inputs = {"num_class": 4,
              "image_size": (448, 448),
