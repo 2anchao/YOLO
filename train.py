@@ -2,7 +2,6 @@
 #author: an_chao1994@163.com
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -15,18 +14,31 @@ from backbone.resnet import resnet34
 from configs.config import Configs as cfg
 from loss.yoloLoss import yoloLoss
 from dataset.dataset import yoloDataset
+import torch.distributed as dist
+import torch.utils.data.distributed
+import argparse
+
+parser = argparse.ArgumentParser(description="use distributed to train yolov1")
+parser.add_argument("--local_rank", type=int, default=0)
+parser.add_argument("--visible_gpu",type=str, default="0,1")
+args = parser.parse_args()
+
+os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpu
+dist.init_process_group(backend='nccl', init_method='env://')
 
 # model = Vovnet27_slim(cfg)
 model = resnet34()
-use_gpu = torch.cuda.is_available()
-device = torch.device("cuda" if use_gpu else "cpu")
-if use_gpu:
-    model.cuda()
+torch.cuda.set_device(args.local_rank)
+model = model.cuda()
+model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
 
 train_dataset = yoloDataset(train=True, debug=False)
-train_loader = DataLoader(train_dataset,batch_size=cfg.Solver["batch_size"], shuffle=True, num_workers=4)
+train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+train_loader = DataLoader(train_dataset,batch_size=cfg.Solver["batch_size"], shuffle=False, num_workers=4, sampler=train_sampler)
+
 test_dataset = yoloDataset(train=False, debug=False)
-test_loader = DataLoader(test_dataset,batch_size=cfg.Solver["batch_size"], shuffle=False, num_workers=4)
+test_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
+test_loader = DataLoader(test_dataset,batch_size=cfg.Solver["batch_size"], shuffle=False, num_workers=4, sampler=test_sampler)
 
 criterion = yoloLoss()
 def train():
@@ -44,8 +56,7 @@ def train():
         for i,(images,target) in enumerate(train_loader):
             images = Variable(images)
             target = Variable(target)
-            if use_gpu:
-                images,target = images.cuda(),target.cuda()
+            images,target = images.cuda(),target.cuda()
             
             pred = model(images)
             loss = criterion(pred, target)
@@ -81,5 +92,4 @@ def val():
 
 if __name__ == "__main__":
     train()
-    
-
+  
