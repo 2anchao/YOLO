@@ -1,6 +1,6 @@
 # YOLOv1
 you only look once
-# 数据格式
+## 数据格式
 一个图片对应一个json，json中是标注信息。    
 {"width": "1920",    
 "height": "1080",     
@@ -16,7 +16,7 @@ you only look once
 "ids": null,    
 "segs": null   
 }
-# 训练
+## 训练
 python train.py.  
 参数在config.py 文件中配置。  
 分布式支持在mutitrain分支。   
