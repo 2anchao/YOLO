@@ -1,7 +1,5 @@
 #encoding:utf-8
-#
-#created by xiongzihua
-#
+
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
