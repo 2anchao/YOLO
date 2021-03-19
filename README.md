@@ -8,7 +8,7 @@ you only look once
 "ori_image": "image.jpg",         
 "boxes": {"box_type": "BBOX",     
          "box_level": "cxcywh",     
-         "boxes": [[0.14010416666666667, 0.2412037037037037, 0.011458333333333348, 0.05092592592592593],...],    
+         "boxes": [[0.14, 0.24、, 0.011, 0.05],...],    
          "hard": [1],    
          "crowd": [1],    
          "extra": [[]]},    
